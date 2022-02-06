@@ -6,4 +6,5 @@ from django.contrib.auth import authenticate
 class BookSerializer(serializers.ModelSerializer):
     class Meta:
         model = Book
-        fields = ('__all__')
+        fields = ('id', 'writer', 'name', 'genre', 'media_type', 'release_date', 'slug', 'description', 'stock', 'price',
+                  'offer_of_the_week', 'image')

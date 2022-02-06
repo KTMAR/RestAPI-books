@@ -17,9 +17,11 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 
+
 from RestAPI import settings
-from books import views
+
 from dj_rest_auth.views import PasswordResetView, PasswordResetConfirmView
+
 
 urlpatterns = [
                   path('admin/', admin.site.urls),
