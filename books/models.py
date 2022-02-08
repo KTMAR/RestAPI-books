@@ -1,6 +1,6 @@
 from django_resized import ResizedImageField
 
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin, User
 from django.db import models
 
 from django.contrib.auth.models import (
@@ -71,6 +71,7 @@ class Book(models.Model):
     price = models.DecimalField(max_digits=9, decimal_places=2, verbose_name='Цена')
     offer_of_the_week = models.BooleanField(default=False, verbose_name='Предолжение недели?')
     image = ResizedImageField(size=[1920, 1080], upload_to=imageUploader, blank=True, null=True)
+    owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         return f'{self.id} | {self.name}'

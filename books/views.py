@@ -1,28 +1,35 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
-from rest_framework.filters import SearchFilter
+from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.viewsets import ModelViewSet
+
 from .serializers import BookSerializer
 from .models import *
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
-from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
+
+from books.permissions import IsOwnerOrStaffOrReadOnly
 
 
-class BookList(ListCreateAPIView):
+class BookListView(ModelViewSet):
     queryset = Book.objects.all().order_by('id')
     serializer_class = BookSerializer
     authentication_classes = [SessionAuthentication, BasicAuthentication]
-    permission_classes = [IsAuthenticatedOrReadOnly]
-    filter_backends = [DjangoFilterBackend, SearchFilter]
+    permission_classes = [IsOwnerOrStaffOrReadOnly]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filter_fields = ['price']
-    search_fields = ['name', 'writer__name', 'genre__name', 'media_type__name']
-
-
-class BookDetail(RetrieveUpdateDestroyAPIView):
-    permission_classes = [IsAuthenticatedOrReadOnly]
-    queryset = Book.objects.all()
-    serializer_class = BookSerializer
-    authentication_classes = [SessionAuthentication, BasicAuthentication]
-
+    search_fields = ['name', 'writer__name', 'genre__name', 'media_type__name', 'description']
+    ordering_fields = ['id', 'price', 'name', 'genre__name']
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+        serializer.validated_data['owner'] = self.request.user
+        serializer.save()
+
+
+# class BookDetail(RetrieveUpdateDestroyAPIView):
+#     permission_classes = [IsAuthenticatedOrReadOnly]
+#     queryset = Book.objects.all()
+#     serializer_class = BookSerializer
+#     authentication_classes = [SessionAuthentication, BasicAuthentication]
+
+    #
+    # def perform_create(self, serializer):
+    #     serializer.save(author=self.request.user)

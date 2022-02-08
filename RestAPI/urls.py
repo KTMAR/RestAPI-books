@@ -16,20 +16,26 @@ Including another URLconf
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
-
+from rest_framework.routers import SimpleRouter
 
 from RestAPI import settings
 
 from dj_rest_auth.views import PasswordResetView, PasswordResetConfirmView
 
+from books.views import BookListView
+
+router = SimpleRouter()
+
+router.register(r'book', BookListView)
 
 urlpatterns = [
                   path('admin/', admin.site.urls),
                   path('api/books/', include('books.urls')),
                   path(('users/'), include('users.urls')),
-
                   path('password-reset/', PasswordResetView.as_view()),
                   path('password-reset-confirm/<slug:uidb64>/<slug:token>/',
                        PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
 
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+urlpatterns += router.urls
