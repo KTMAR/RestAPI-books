@@ -1,16 +1,21 @@
+from django.db.models import Count, Case, When, Avg
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.filters import SearchFilter, OrderingFilter
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.mixins import UpdateModelMixin
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.viewsets import ModelViewSet, GenericViewSet
 
-from .serializers import BookSerializer
+from .serializers import BookSerializer, UserBookRelationSerializer
 from .models import *
 
 from books.permissions import IsOwnerOrStaffOrReadOnly
 
 
 class BookListView(ModelViewSet):
-    queryset = Book.objects.all().order_by('id')
+    queryset = Book.objects.all().annotate(
+        annotated_likes=Count(Case(When(userbookrelation__like=True, then=1))),
+        rating=Avg('userbookrelation__rating'))
     serializer_class = BookSerializer
     authentication_classes = [SessionAuthentication, BasicAuthentication]
     permission_classes = [IsOwnerOrStaffOrReadOnly]
@@ -24,12 +29,13 @@ class BookListView(ModelViewSet):
         serializer.save()
 
 
-# class BookDetail(RetrieveUpdateDestroyAPIView):
-#     permission_classes = [IsAuthenticatedOrReadOnly]
-#     queryset = Book.objects.all()
-#     serializer_class = BookSerializer
-#     authentication_classes = [SessionAuthentication, BasicAuthentication]
+class UserBookRelationView(UpdateModelMixin, GenericViewSet):
+    permission_classes = [IsAuthenticated]
+    queryset = UserBookRelation.objects.all()
+    serializer_class = UserBookRelationSerializer
+    lookup_field = 'book'
 
-    #
-    # def perform_create(self, serializer):
-    #     serializer.save(author=self.request.user)
+    def get_object(self):
+        obj, _ = UserBookRelation.objects.get_or_create(user=self.request.user, book_id=self.kwargs['book'])
+
+        return obj

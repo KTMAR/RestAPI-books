@@ -2,7 +2,7 @@ from django_resized import ResizedImageField
 
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin, User
 from django.db import models
-
+from django.utils.text import slugify
 from django.contrib.auth.models import (
     AbstractBaseUser, PermissionsMixin
 )
@@ -71,10 +71,15 @@ class Book(models.Model):
     price = models.DecimalField(max_digits=9, decimal_places=2, verbose_name='Цена')
     offer_of_the_week = models.BooleanField(default=False, verbose_name='Предолжение недели?')
     image = ResizedImageField(size=[1920, 1080], upload_to=imageUploader, blank=True, null=True)
-    owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='owner_books')
+    readers = models.ManyToManyField(User, through='UserBookRelation', related_name='reader_books')
 
     def __str__(self):
         return f'{self.id} | {self.name}'
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.name)
+        super(Book, self).save(*args, **kwargs)
 
     def ct_model(self):
         return self._meta.model_name
@@ -82,3 +87,25 @@ class Book(models.Model):
     class Meta:
         verbose_name = "Книга"
         verbose_name_plural = 'Книги'
+
+
+class UserBookRelation(models.Model):
+
+    RATE_CHOICES = (
+        (1, 'BAD'),
+        (2, 'NOT BAD'),
+        (3, 'GOOD'),
+        (4, 'NICE'),
+        (5, 'AMAZING')
+
+    )
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    book = models.ForeignKey(Book, on_delete=models.CASCADE)
+    like = models.BooleanField(default=False)
+    in_bookmarks = models.BooleanField(default=False)
+    rating = models.PositiveSmallIntegerField(choices=RATE_CHOICES, null=True)
+
+    def __str__(self):
+        return f'{self.user.username} | {self.book.name} | like: {self.like} | in_bookmarks: {self.in_bookmarks}' \
+               f' | rating: {self.rating}'

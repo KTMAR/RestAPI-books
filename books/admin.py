@@ -15,9 +15,8 @@ class GenreAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',), }
 
 
-
-
 admin.site.register(Book, BookAdmin)
 admin.site.register(Genre, GenreAdmin)
 admin.site.register(Writer, WriterAdmin)
 admin.site.register(MediaType)
+admin.site.register(UserBookRelation)

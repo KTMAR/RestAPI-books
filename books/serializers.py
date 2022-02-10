@@ -7,6 +7,8 @@ class BookSerializer(serializers.ModelSerializer):
     writer_name = serializers.StringRelatedField(source='writer.name')
     genre_name = serializers.StringRelatedField(source='genre.name')
     media_type_name = serializers.StringRelatedField(source='media_type.name')
+    annotated_likes = serializers.IntegerField(read_only=True)
+    rating = serializers.DecimalField(max_digits=3, decimal_places=2, read_only=True)
 
     class Meta:
         model = Book
@@ -17,9 +19,17 @@ class BookSerializer(serializers.ModelSerializer):
             'genre_name',
             'media_type_name',
             'release_date',
-            'slug',
             'description',
             'stock',
             'price',
-            'offer_of_the_week',
-            'image')
+            'image',
+            'annotated_likes',
+            'rating')
+
+
+
+
+class UserBookRelationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserBookRelation
+        fields = ('book', 'like', 'in_bookmarks', 'rating')
