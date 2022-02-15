@@ -15,12 +15,14 @@ class BookSerializerTestCase(TestCase):
                                            stock=12,
                                            price="999.00",
                                            offer_of_the_week=False,
+                                           owner=self.user1
                                            )
         self.book_22 = Book.objects.create(name="Калебfdfdfd Шомоtest fgfgfgfgf",
                                            description="MEdfsfsd",
                                            stock=542,
                                            price="934343.00",
                                            offer_of_the_week=False,
+                                           owner=self.user2
                                            )
 
         UserBookRelation.objects.create(user=self.user1, book=self.book_21, like=True, rating=5)
@@ -45,7 +47,8 @@ class BookSerializerTestCase(TestCase):
                 'price': '999.00',
                 'image': None,
                 'annotated_likes': 2,
-                'rating': '3.50'
+                'rating': '3.50',
+                'owner': 'testuser1'
             },
             {
                 'id': self.book_22.id,
@@ -56,8 +59,9 @@ class BookSerializerTestCase(TestCase):
                 'price': '934343.00',
                 'image': None,
                 'annotated_likes': 1,
-                'rating': '4.00'
+                'rating': '4.00',
+                'owner': 'testuser2'
             }
         ]
-        print(data)
+
         self.assertEqual(expected_data, data)

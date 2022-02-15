@@ -9,6 +9,7 @@ class BookSerializer(serializers.ModelSerializer):
     media_type_name = serializers.StringRelatedField(source='media_type.name')
     annotated_likes = serializers.IntegerField(read_only=True)
     rating = serializers.DecimalField(max_digits=3, decimal_places=2, read_only=True)
+    owner = serializers.CharField(source='owner.username', default='', read_only=True)
 
     class Meta:
         model = Book
@@ -24,9 +25,8 @@ class BookSerializer(serializers.ModelSerializer):
             'price',
             'image',
             'annotated_likes',
-            'rating')
-
-
+            'rating',
+            'owner')
 
 
 class UserBookRelationSerializer(serializers.ModelSerializer):

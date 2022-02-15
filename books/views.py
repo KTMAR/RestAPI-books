@@ -5,17 +5,16 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.mixins import UpdateModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
-
 from .serializers import BookSerializer, UserBookRelationSerializer
 from .models import *
-
 from books.permissions import IsOwnerOrStaffOrReadOnly
 
 
 class BookListView(ModelViewSet):
     queryset = Book.objects.all().annotate(
         annotated_likes=Count(Case(When(userbookrelation__like=True, then=1))),
-        rating=Avg('userbookrelation__rating'))
+        rating=Avg('userbookrelation__rating')).select_related('writer').select_related(
+        'genre').select_related('media_type').select_related('owner')
     serializer_class = BookSerializer
     authentication_classes = [SessionAuthentication, BasicAuthentication]
     permission_classes = [IsOwnerOrStaffOrReadOnly]
