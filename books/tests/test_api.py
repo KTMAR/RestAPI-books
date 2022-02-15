@@ -45,12 +45,13 @@ class BookSerializerTestCase(APITestCase):
         response = self.client.get(self.url)
         books = Book.objects.all().annotate(
             annotated_likes=Count(Case(When(userbookrelation__like=True, then=1))),
-            rating=Avg('userbookrelation__rating'))
+            rating=Avg('userbookrelation__rating')).select_related('owner').select_related('writer').select_related(
+            'genre').select_related('media_type')
         serializer_data = BookSerializer(books, many=True).data
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         self.assertEqual(serializer_data, response.data)
-        self.assertEqual(serializer_data[2]['rating'], '3.50')
-        self.assertEqual(serializer_data[2]['annotated_likes'], 2)
+        self.assertEqual(serializer_data[1]['rating'], '3.50')
+        self.assertEqual(serializer_data[1]['annotated_likes'], 2)
 
     def test_get_filter(self):
         response = self.client.get(self.url, data={'price': '999.00'})
@@ -69,8 +70,6 @@ class BookSerializerTestCase(APITestCase):
         serializer_data = BookSerializer(books, many=True).data
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         self.assertEqual(serializer_data, response.data)
-
-
 
     def test_get_sorted(self):
         response = self.client.get(self.url, data={'ordering': '-id'})

@@ -90,7 +90,6 @@ class Book(models.Model):
 
 
 class UserBookRelation(models.Model):
-
     RATE_CHOICES = (
         (1, 'BAD'),
         (2, 'NOT BAD'),
